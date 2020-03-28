@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 bft_types = { path = "../bft_types", version = "0" }
+num-traits = "0.2"
