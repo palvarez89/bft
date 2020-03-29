@@ -1,3 +1,5 @@
+use bft_types::Program;
+
 #[derive(Debug)]
 pub struct VirtualMachine<Number> {
     memory: Vec<Number>,
@@ -14,6 +16,12 @@ impl<Number: Clone + num_traits::Num> VirtualMachine<Number> {
         VirtualMachine {
             memory: vec![Number::zero(); size],
             head: 0,
+        }
+    }
+    pub fn load_program(self: &Self, program: &Program) {
+        let instructions = program.get_instructions();
+        for inst in instructions {
+            println!("{:?}", inst);
         }
     }
 }
