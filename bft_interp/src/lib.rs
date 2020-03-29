@@ -1,10 +1,11 @@
-struct VirtualMachine<Number> {
+#[derive(Debug)]
+pub struct VirtualMachine<Number> {
     memory: Vec<Number>,
     head: usize,
 }
 
 impl<Number: Clone + num_traits::Num> VirtualMachine<Number> {
-    fn new(size: usize, elastic: bool) -> VirtualMachine<Number> {
+    pub fn new(size: usize, elastic: bool) -> VirtualMachine<Number> {
         let size = match size {
             0 => 30000,
             n => n,
