@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum RawInstruction {
     MoveLeft,
     MoveRight,
@@ -74,4 +74,43 @@ impl Program {
     }
 }
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_char() {
+        assert!(RawInstruction::from_char('o').is_none());
+        assert_eq!(
+            RawInstruction::from_char('<').unwrap(),
+            RawInstruction::MoveLeft
+        );
+        assert_eq!(
+            RawInstruction::from_char('>').unwrap(),
+            RawInstruction::MoveRight
+        );
+        assert_eq!(
+            RawInstruction::from_char('+').unwrap(),
+            RawInstruction::Increment
+        );
+        assert_eq!(
+            RawInstruction::from_char('-').unwrap(),
+            RawInstruction::Decrement
+        );
+        assert_eq!(
+            RawInstruction::from_char('[').unwrap(),
+            RawInstruction::BeginLoop
+        );
+        assert_eq!(
+            RawInstruction::from_char(']').unwrap(),
+            RawInstruction::EndLoop
+        );
+        assert_eq!(
+            RawInstruction::from_char(',').unwrap(),
+            RawInstruction::Input
+        );
+        assert_eq!(
+            RawInstruction::from_char('.').unwrap(),
+            RawInstruction::Output
+        );
+    }
+}
