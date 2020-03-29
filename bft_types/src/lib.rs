@@ -50,12 +50,10 @@ impl Program {
             instructions,
         }
     }
-    pub fn from_file(filename: &Path) -> std::io::Result<Program> {
-        let filename = filename.to_path_buf();
-        let content = fs::read_to_string(&filename)?;
-        let mut instructions: Vec<Instruction> = Vec::new();
 
-        for (row, line) in content.lines().enumerate() {
+    fn extract_instrunctions(program_string: String) -> Vec<Instruction> {
+        let mut instructions: Vec<Instruction> = Vec::new();
+        for (row, line) in program_string.lines().enumerate() {
             for (column, c) in line.chars().enumerate() {
                 let inst = RawInstruction::from_char(c);
                 if let Some(instruction) = inst {
@@ -67,7 +65,13 @@ impl Program {
                 }
             }
         }
-        Ok(Program::new(filename, instructions))
+        instructions
+    }
+
+    pub fn from_file(filename: &Path) -> std::io::Result<Program> {
+        let filename = filename.to_path_buf();
+        let content = fs::read_to_string(&filename)?;
+        Ok(Program::new(filename, Self::extract_instrunctions(content)))
     }
     pub fn get_instructions(self: &Self) -> &[Instruction] {
         &self.instructions[..]
