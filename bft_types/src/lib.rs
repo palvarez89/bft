@@ -30,7 +30,7 @@ impl RawInstruction {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Instruction {
     instruction: RawInstruction,
     row: usize,
@@ -115,6 +115,43 @@ mod tests {
         assert_eq!(
             RawInstruction::from_char('.').unwrap(),
             RawInstruction::Output
+        );
+    }
+    #[test]
+    fn test_extract_instructions() {
+        let a_program = "<   >\n[foo]";
+        let instsructions = Program::extract_instrunctions(a_program.to_owned());
+        assert_eq!(
+            instsructions[0],
+            Instruction {
+                row: 1,
+                column: 1,
+                instruction: RawInstruction::MoveLeft
+            }
+        );
+        assert_eq!(
+            instsructions[1],
+            Instruction {
+                row: 1,
+                column: 5,
+                instruction: RawInstruction::MoveRight
+            }
+        );
+        assert_eq!(
+            instsructions[2],
+            Instruction {
+                row: 2,
+                column: 1,
+                instruction: RawInstruction::BeginLoop
+            }
+        );
+        assert_eq!(
+            instsructions[3],
+            Instruction {
+                row: 2,
+                column: 5,
+                instruction: RawInstruction::EndLoop
+            }
         );
     }
 }
