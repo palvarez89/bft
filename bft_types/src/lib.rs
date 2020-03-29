@@ -31,7 +31,7 @@ impl RawInstruction {
 }
 
 #[derive(Debug)]
-struct Instruction {
+pub struct Instruction {
     instruction: RawInstruction,
     row: usize,
     column: usize,
@@ -68,6 +68,9 @@ impl Program {
             }
         }
         Ok(Program::new(filename, instructions))
+    }
+    pub fn get_instructions(self: &Self) -> &[Instruction] {
+        &self.instructions[..]
     }
 }
 #[cfg(test)]
