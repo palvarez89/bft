@@ -1,16 +1,29 @@
+//! Definition of types to be used in our bft program
+
+#![deny(missing_docs)]
+
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
+/// A raw instruction of a bft program
 #[derive(Debug, PartialEq)]
-enum RawInstruction {
+pub enum RawInstruction {
+    /// decrement the data pointer (to point to the next cell to the left) `<`
     MoveLeft,
+    /// increment the data pointer (to point to the next cell to the right) `>`
     MoveRight,
+    /// increment (increase by one) the byte at the data pointer `+`
     Increment,
+    /// decrement (decrease by one) the byte at the data pointer `-`
     Decrement,
+    /// output the byte at the data pointer `.`
     Input,
+    /// accept one byte of input, storing its value in the byte at the data pointer `,`
     Output,
+    /// if the byte at the data pointer is zero, jump to end `[`
     BeginLoop,
+    /// if the byte at the data pointer is nonzero, jump to beginning `]`
     EndLoop,
 }
 
@@ -31,15 +44,22 @@ impl RawInstruction {
 }
 
 #[derive(Debug, PartialEq)]
+/// An instruction of a bft program with metadata
 pub struct Instruction {
+    /// The raw instructin itself
     instruction: RawInstruction,
+    /// Row where the instruction is located
     row: usize,
+    /// Column where the instruction is located
     column: usize,
 }
 
 #[derive(Debug)]
+/// A bft program
 pub struct Program {
+    /// The path from where the program was loaded
     filename: PathBuf,
+    /// A vector of the instructions of the program
     instructions: Vec<Instruction>,
 }
 
@@ -68,11 +88,20 @@ impl Program {
         instructions
     }
 
+    /// Function to load a program forom a Path
+    /// ```
+    /// # use bft_types::Program;
+    /// use std::path::Path;
+    /// let path = Path::new("program.bft");
+    /// let program = Program::from_file(path);
+    /// ```
     pub fn from_file(filename: &Path) -> std::io::Result<Program> {
         let filename = filename.to_path_buf();
         let content = fs::read_to_string(&filename)?;
         Ok(Program::new(filename, Self::extract_instrunctions(content)))
     }
+
+    /// Getter of the instructions vector as a slice
     pub fn get_instructions(self: &Self) -> &[Instruction] {
         &self.instructions[..]
     }
