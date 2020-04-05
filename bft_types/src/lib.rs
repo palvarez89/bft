@@ -2,12 +2,13 @@
 
 #![deny(missing_docs)]
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
 /// A raw instruction of a bft program
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum RawInstruction {
     /// decrement the data pointer (to point to the next cell to the left) `<`
     MoveLeft,
@@ -43,7 +44,7 @@ impl RawInstruction {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 /// An instruction of a bft program with metadata
 pub struct Instruction {
     /// The raw instructin itself
@@ -55,12 +56,32 @@ pub struct Instruction {
 }
 
 #[derive(Debug)]
+struct ProgramError {
+    inst: Instruction,
+    msg: String,
+}
+use std::error::Error;
+use std::fmt;
+
+impl Error for ProgramError {}
+
+impl fmt::Display for ProgramError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "ERROR: {}\nIn row {} column {}",
+            self.msg, self.inst.row, self.inst.column
+        )
+    }
+}
+#[derive(Debug)]
 /// A bft program
 pub struct Program {
     /// The path from where the program was loaded
     filename: PathBuf,
     /// A vector of the instructions of the program
     instructions: Vec<Instruction>,
+    loop_gotos: HashMap<usize, usize>,
 }
 
 impl Program {
@@ -68,6 +89,7 @@ impl Program {
         Program {
             filename,
             instructions,
+            loop_gotos: HashMap::new(),
         }
     }
 
@@ -104,6 +126,41 @@ impl Program {
     /// Getter of the instructions vector as a slice
     pub fn get_instructions(self: &Self) -> &[Instruction] {
         &self.instructions[..]
+    }
+
+    /// Check if the syntax of the program is correct
+    pub fn check_syntax(&mut self) -> Result<(), Box<dyn Error>> {
+        let mut bracket_index = Vec::<usize>::new();
+        for (index, current_inst) in self.instructions.iter().enumerate() {
+            if let RawInstruction::BeginLoop = current_inst.instruction {
+                bracket_index.push(index);
+            } else if let RawInstruction::EndLoop = current_inst.instruction {
+                let pop = bracket_index.pop();
+                match pop {
+                    Some(beginloop_index) => {
+                        self.loop_gotos.insert(beginloop_index, index);
+                        self.loop_gotos.insert(index, beginloop_index);
+                    }
+                    None => {
+                        return Err(Box::new(ProgramError {
+                            inst: *current_inst,
+                            msg: "Couldn't find matching opening bracket".to_owned(),
+                        }))
+                    }
+                }
+            }
+        }
+
+        match bracket_index.pop() {
+            Some(index) => {
+                let inst = self.get_instructions().get(index).unwrap();
+                Err(Box::new(ProgramError {
+                    inst: *inst,
+                    msg: "Found unclosed bracket".to_owned(),
+                }))
+            }
+            None => Ok(()),
+        }
     }
 }
 #[cfg(test)]
