@@ -1,22 +1,7 @@
-use bft_interp;
-use bft_types;
-use std::path::{Path, PathBuf};
 use structopt::StructOpt;
-
-#[derive(Debug, StructOpt)]
-#[structopt(name = "bft", about = "A bft program interpreter.")]
-struct Opt {
-    /// Input file with bft program
-    #[structopt(name = "PROGRAM", parse(from_os_str))]
-    input: PathBuf,
-}
+mod cli;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let opt = Opt::from_args();
-    let fname = opt.input;
-
-    let the_program = bft_types::Program::from_file(Path::new(&fname))?;
-    let memory = bft_interp::VirtualMachine::<u8>::new(0, false);
-    memory.load_program(&the_program);
-    Ok(())
+    let opt = cli::Opt::from_args();
+    cli::entrypoint(opt)
 }
