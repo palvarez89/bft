@@ -7,10 +7,11 @@ pub struct VirtualMachine<Number> {
 }
 
 impl<Number: Clone + num_traits::Num> VirtualMachine<Number> {
-    pub fn new(size: usize, elastic: bool) -> VirtualMachine<Number> {
+    pub fn new(size: Option<usize>, elastic: bool) -> VirtualMachine<Number> {
         let size = match size {
-            0 => 30000,
-            n => n,
+            Some(0) => 30000,
+            Some(n) => n,
+            None => 30000,
         };
 
         VirtualMachine {
