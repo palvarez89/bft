@@ -4,6 +4,7 @@ use bft_types::Program;
 pub struct VirtualMachine<Number> {
     memory: Vec<Number>,
     head: usize,
+    elastic: bool,
 }
 
 impl<Number: Clone + num_traits::Num> VirtualMachine<Number> {
@@ -17,6 +18,7 @@ impl<Number: Clone + num_traits::Num> VirtualMachine<Number> {
         VirtualMachine {
             memory: vec![Number::zero(); size],
             head: 0,
+            elastic,
         }
     }
     pub fn load_program(self: &Self, program: &Program) {
