@@ -20,7 +20,8 @@ pub struct Opt {
 }
 
 pub fn entrypoint(opt: Opt) -> Result<(), Box<dyn std::error::Error>> {
-    let the_program = bft_types::Program::from_file(Path::new(&opt.input))?;
+    let mut the_program = bft_types::Program::from_file(Path::new(&opt.input))?;
+    the_program.check_syntax()?;
     let memory = bft_interp::VirtualMachine::<u8>::new(opt.cells, opt.extensible);
     memory.load_program(&the_program);
     Ok(())
