@@ -22,7 +22,7 @@ fn run_bft(args: &cli::Opt) -> Result<(), Box<dyn std::error::Error>> {
     let mut the_program = bft_types::Program::from_file(Path::new(&args.input))?;
     the_program.check_syntax()?;
 
-    let memory = bft_interp::VirtualMachine::<u8>::new(args.cells, args.extensible);
+    let memory = bft_interp::VirtualMachine::<u8>::new(&the_program, args.cells, args.extensible);
     memory.load_program(&the_program);
     Ok(())
 }
