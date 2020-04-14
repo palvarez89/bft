@@ -3,6 +3,8 @@
 #![deny(missing_docs)]
 
 use std::collections::HashMap;
+use std::error::Error;
+use std::fmt;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -56,24 +58,28 @@ pub struct Instruction {
 }
 
 #[derive(Debug)]
-struct ProgramError {
-    inst: Instruction,
-    msg: String,
+enum ProgramError {
+    UnclosedLoop(Instruction),
+    UnopenedLoop(Instruction),
 }
-use std::error::Error;
-use std::fmt;
 
 impl Error for ProgramError {}
 
 impl fmt::Display for ProgramError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{msg}. Location: row {row} column {column}",
-            msg = self.msg,
-            row = self.inst.row,
-            column = self.inst.column
-        )
+        let msg = match self {
+            ProgramError::UnclosedLoop(i) => format!(
+                "Found unclosed bracket at row {row} column {column}",
+                row = i.row,
+                column = i.column
+            ),
+            ProgramError::UnopenedLoop(i) => format!(
+                "Couldn't find matching opening bracket for bracket at row {row}, column {column}",
+                row = i.row,
+                column = i.column
+            ),
+        };
+        write!(f, "{}", msg)
     }
 }
 #[derive(Debug)]
@@ -143,12 +149,7 @@ impl Program {
                         self.loop_gotos.insert(beginloop_index, index);
                         self.loop_gotos.insert(index, beginloop_index);
                     }
-                    None => {
-                        return Err(Box::new(ProgramError {
-                            inst: *current_inst,
-                            msg: "Couldn't find matching opening bracket".to_owned(),
-                        }))
-                    }
+                    None => return Err(Box::new(ProgramError::UnopenedLoop(*current_inst))),
                 }
             }
         }
@@ -156,10 +157,7 @@ impl Program {
         match bracket_index.pop() {
             Some(index) => {
                 let inst = self.get_instructions().get(index).unwrap();
-                Err(Box::new(ProgramError {
-                    inst: *inst,
-                    msg: "Found unclosed bracket".to_owned(),
-                }))
+                Err(Box::new(ProgramError::UnclosedLoop(*inst)))
             }
             None => Ok(()),
         }
