@@ -69,8 +69,10 @@ impl fmt::Display for ProgramError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "ERROR: {}\nIn row {} column {}",
-            self.msg, self.inst.row, self.inst.column
+            "{msg}. Location: row {row} column {column}",
+            msg = self.msg,
+            row = self.inst.row,
+            column = self.inst.column
         )
     }
 }
