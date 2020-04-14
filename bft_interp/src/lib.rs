@@ -1,3 +1,4 @@
+use bft_types::Instruction;
 use bft_types::Program;
 
 #[derive(Debug)]
@@ -31,6 +32,10 @@ impl<Number: Clone + num_traits::Num> VirtualMachine<'_, Number> {
             println!("{:?}", inst);
         }
     }
+}
+
+pub enum VMError {
+    HeadOutOfMemory(Instruction),
 }
 
 #[cfg(test)]
