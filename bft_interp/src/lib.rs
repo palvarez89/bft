@@ -1,6 +1,11 @@
+//! Definition of types to be used in our bft program
+
+#![deny(missing_docs)]
+
 use bft_types::Instruction;
 use bft_types::Program;
 
+/// The virtual machine (Memory, PC, etc) of the interpreter
 #[derive(Debug)]
 pub struct VirtualMachine<'a, Number> {
     memory: Vec<Number>,
@@ -11,6 +16,7 @@ pub struct VirtualMachine<'a, Number> {
 }
 
 impl<Number: Clone + num_traits::Num> VirtualMachine<'_, Number> {
+    /// Constructor of the VirtualMachine
     pub fn new(program: &Program, size: Option<usize>, elastic: bool) -> VirtualMachine<Number> {
         let size = match size {
             Some(0) => 30000,
@@ -26,12 +32,14 @@ impl<Number: Clone + num_traits::Num> VirtualMachine<'_, Number> {
             program_counter: 0,
         }
     }
+    /// Load program (not implemented yet)
     pub fn load_program(self: &Self, program: &Program) {
         let instructions = program.get_instructions();
         for inst in instructions {
             println!("{:?}", inst);
         }
     }
+    /// Move head to the left
     pub fn move_head_left(&mut self) -> Result<(), VMError> {
         if self.head == 0 {
             return Err(VMError::HeadOutOfMemory(
@@ -41,6 +49,7 @@ impl<Number: Clone + num_traits::Num> VirtualMachine<'_, Number> {
         self.head -= 1;
         Ok(())
     }
+    /// Move head to the right
     pub fn move_head_right(&mut self) -> Result<(), VMError> {
         // Check if we are at the end of the memory
         if self.head == (self.memory.len() - 1) {
@@ -57,7 +66,9 @@ impl<Number: Clone + num_traits::Num> VirtualMachine<'_, Number> {
     }
 }
 
+/// Error definitions for VirtualMaachine
 pub enum VMError {
+    /// Error for when the head moves out of the memory
     HeadOutOfMemory(Instruction),
 }
 
