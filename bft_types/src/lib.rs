@@ -132,8 +132,8 @@ impl Program {
     }
 
     /// Getter of the instructions vector as a slice
-    pub fn get_instructions(self: &Self) -> &[Instruction] {
-        &self.instructions[..]
+    pub fn instructions(self: &Self) -> &[Instruction] {
+        &self.instructions
     }
 
     /// Check if the syntax of the program is correct
@@ -156,7 +156,7 @@ impl Program {
 
         match bracket_index.pop() {
             Some(index) => {
-                let inst = self.get_instructions().get(index).unwrap();
+                let inst = self.instructions().get(index).unwrap();
                 Err(Box::new(ProgramError::UnclosedLoop(*inst)))
             }
             None => Ok(()),

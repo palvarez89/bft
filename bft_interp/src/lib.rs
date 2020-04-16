@@ -34,7 +34,7 @@ impl<Number: Clone + num_traits::Num> VirtualMachine<'_, Number> {
     }
     /// Load program (not implemented yet)
     pub fn load_program(self: &Self, program: &Program) {
-        let instructions = program.get_instructions();
+        let instructions = program.instructions();
         for inst in instructions {
             println!("{:?}", inst);
         }
@@ -43,7 +43,7 @@ impl<Number: Clone + num_traits::Num> VirtualMachine<'_, Number> {
     pub fn move_head_left(&mut self) -> Result<(), VMError> {
         if self.head == 0 {
             return Err(VMError::HeadOutOfMemory(
-                self.program.get_instructions()[self.program_counter],
+                self.program.instructions()[self.program_counter],
             ));
         }
         self.head -= 1;
@@ -57,7 +57,7 @@ impl<Number: Clone + num_traits::Num> VirtualMachine<'_, Number> {
                 self.memory.push(Number::zero());
             } else {
                 return Err(VMError::HeadOutOfMemory(
-                    self.program.get_instructions()[self.program_counter],
+                    self.program.instructions()[self.program_counter],
                 ));
             }
         }
