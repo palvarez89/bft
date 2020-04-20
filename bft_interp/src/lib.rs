@@ -72,6 +72,34 @@ where
             ))
         }
     }
+    /// Read byte on memory cell pointed by head
+    pub fn read_into_head(&mut self, reader: Box<dyn Read>) -> Result<(), VMError> {
+        let result = match self.memory.get_mut(self.head) {
+            Some(cell) => cell.from_reader(reader),
+            None => Ok(()),
+        };
+        match result {
+            Err(e) => Err(VMError::IOError(
+                e,
+                self.program.instructions()[self.program_counter],
+            )),
+            Ok(_) => Ok(()),
+        }
+    }
+    /// Write cell pointed by head into output
+    pub fn write_from_head(&self, writer: Box<dyn Write>) -> Result<(), VMError> {
+        let result = match self.memory.get(self.head) {
+            Some(cell) => cell.to_writer(writer),
+            None => Ok(()),
+        };
+        match result {
+            Err(e) => Err(VMError::IOError(
+                e,
+                self.program.instructions()[self.program_counter],
+            )),
+            Ok(_) => Ok(()),
+        }
+    }
 }
 
 /// Define functions that our VirtualMachine cells
