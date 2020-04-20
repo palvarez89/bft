@@ -38,7 +38,7 @@ where
         }
     }
     /// Load program (not implemented yet)
-    pub fn load_program(self: &Self, program: &Program) {
+    pub fn load_program(&self, program: &Program) {
         let instructions = program.instructions();
         for inst in instructions {
             println!("{:?}", inst);

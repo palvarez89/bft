@@ -132,7 +132,7 @@ impl Program {
     }
 
     /// Getter of the instructions vector as a slice
-    pub fn instructions(self: &Self) -> &[Instruction] {
+    pub fn instructions(&self) -> &[Instruction] {
         &self.instructions
     }
 
