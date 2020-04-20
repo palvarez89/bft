@@ -15,7 +15,10 @@ pub struct VirtualMachine<'a, Number> {
     program: &'a Program,
 }
 
-impl<'a, Number: Clone + num_traits::Num> VirtualMachine<'a, Number> {
+impl<'a, Number> VirtualMachine<'a, Number>
+where
+    Number: PartialEq + Clone + CellKind + num_traits::Num,
+{
     /// Constructor of the VirtualMachine
     pub fn new(program: &'a Program, size: Option<usize>, elastic: bool) -> Self {
         let size = match size {
@@ -69,6 +72,23 @@ impl<'a, Number: Clone + num_traits::Num> VirtualMachine<'a, Number> {
     }
 }
 
+/// Define functions that our VirtualMachine cells
+/// should implement
+pub trait CellKind {
+    /// Increment by one the value of the cell
+    fn wrapping_increment(&mut self);
+    /// Decrement by one the value of the cell
+    fn wrapping_decrement(&mut self);
+}
+
+impl CellKind for u8 {
+    fn wrapping_increment(&mut self) {
+        *self = self.wrapping_add(1);
+    }
+    fn wrapping_decrement(&mut self) {
+        *self = self.wrapping_sub(1);
+    }
+}
 /// Error definitions for VirtualMaachine
 pub enum VMError {
     /// Error for when the head moves out of the memory
