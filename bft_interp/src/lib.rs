@@ -42,27 +42,30 @@ impl<'a, Number: Clone + num_traits::Num> VirtualMachine<'a, Number> {
     /// Move head to the left
     pub fn move_head_left(&mut self) -> Result<(), VMError> {
         if self.head == 0 {
-            return Err(VMError::HeadOutOfMemory(
+            Err(VMError::HeadOutOfMemory(
                 self.program.instructions()[self.program_counter],
-            ));
+            ))
+        } else {
+            self.head -= 1;
+            Ok(())
         }
-        self.head -= 1;
-        Ok(())
     }
     /// Move head to the right
     pub fn move_head_right(&mut self) -> Result<(), VMError> {
-        // Check if we are at the end of the memory
-        if self.head == (self.memory.len() - 1) {
-            if self.elastic {
-                self.memory.push(Number::zero());
-            } else {
-                return Err(VMError::HeadOutOfMemory(
-                    self.program.instructions()[self.program_counter],
-                ));
+        // Check if we can increase the head
+        if self.elastic || self.head != (self.memory.len() - 1) {
+            // If head is at the end of the memory, considering
+            // memory is elasic, increase the memory.
+            if self.head == self.memory.len() - 1 {
+                self.memory.push(Number::zero())
             }
+            self.head += 1;
+            Ok(())
+        } else {
+            Err(VMError::HeadOutOfMemory(
+                self.program.instructions()[self.program_counter],
+            ))
         }
-        self.head += 1;
-        Ok(())
     }
 }
 
