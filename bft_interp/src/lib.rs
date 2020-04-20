@@ -15,16 +15,16 @@ pub struct VirtualMachine<'a, Number> {
     program: &'a Program,
 }
 
-impl<Number: Clone + num_traits::Num> VirtualMachine<'_, Number> {
+impl<'a, Number: Clone + num_traits::Num> VirtualMachine<'a, Number> {
     /// Constructor of the VirtualMachine
-    pub fn new(program: &Program, size: Option<usize>, elastic: bool) -> VirtualMachine<Number> {
+    pub fn new(program: &'a Program, size: Option<usize>, elastic: bool) -> Self {
         let size = match size {
             Some(0) => 30000,
             Some(n) => n,
             None => 30000,
         };
 
-        VirtualMachine {
+        Self {
             program,
             memory: vec![Number::zero(); size],
             head: 0,
