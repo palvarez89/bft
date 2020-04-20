@@ -141,4 +141,54 @@ pub enum VMError {
 }
 
 #[cfg(test)]
-mod tests {}
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_u8_cellkind_decrement() {
+        let mut cell = 1u8;
+        cell.wrapping_decrement();
+        assert_eq!(cell, 0);
+
+        let mut cell = 0u8;
+        cell.wrapping_decrement();
+        assert_eq!(cell, std::u8::MAX);
+    }
+    #[test]
+    fn test_u8_cellkind_increment() {
+        let mut cell = 0u8;
+        cell.wrapping_increment();
+        assert_eq!(cell, 1u8);
+
+        let mut cell = std::u8::MAX;
+        cell.wrapping_increment();
+        assert_eq!(cell, 0u8);
+    }
+    #[test]
+    fn test_u8_cellkind_from_reader_success() {
+        let input = "This string will be read";
+        // Don't run as_bytes in the string literal because of clippy
+        let mut b = input.as_bytes();
+        let mut cell = 0u8;
+        assert!(cell.from_reader(&mut b).is_ok());
+        assert_eq!(cell, b'T');
+    }
+    #[test]
+    fn test_u8_cellkind_from_reader_failure() {
+        let input = "";
+        // Don't run as_bytes in the string literal because of clippy
+        let mut b = input.as_bytes();
+        let mut cell = 0u8;
+        assert!(cell.from_reader(&mut b).is_err());
+    }
+    #[test]
+    fn test_u8_cellkind_to_writer() {
+        use std::io::Cursor;
+        let mut buff = Cursor::new(vec![0u8; 5]);
+        assert!(105u8.to_writer(&mut buff).is_ok());
+        assert!(114u8.to_writer(&mut buff).is_ok());
+        assert!(111u8.to_writer(&mut buff).is_ok());
+        assert!(110u8.to_writer(&mut buff).is_ok());
+        assert_eq!(&buff.get_ref()[..], b"iron\0");
+    }
+}
