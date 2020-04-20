@@ -106,6 +106,8 @@ impl CellKind for u8 {
 pub enum VMError {
     /// Error for when the head moves out of the memory
     HeadOutOfMemory(Instruction),
+    /// IO error when reading or writing bytes
+    IOError(std::io::Error, Instruction),
 }
 
 #[cfg(test)]
