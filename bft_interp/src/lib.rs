@@ -4,6 +4,8 @@
 
 use bft_types::Instruction;
 use bft_types::Program;
+use std::fmt;
+use std::io::{Read, Write};
 
 /// The virtual machine (Memory, PC, etc) of the interpreter
 #[derive(Debug)]
@@ -74,11 +76,15 @@ where
 
 /// Define functions that our VirtualMachine cells
 /// should implement
-pub trait CellKind {
+pub trait CellKind: fmt::Debug {
     /// Increment by one the value of the cell
     fn wrapping_increment(&mut self);
     /// Decrement by one the value of the cell
     fn wrapping_decrement(&mut self);
+    /// Load cell from reader
+    fn from_reader(&mut self, reader: Box<dyn Read>) -> Result<(), std::io::Error>;
+    /// Write cell contents
+    fn to_writer(&self, writer: Box<dyn Write>) -> Result<(), std::io::Error>;
 }
 
 impl CellKind for u8 {
@@ -87,6 +93,13 @@ impl CellKind for u8 {
     }
     fn wrapping_decrement(&mut self) {
         *self = self.wrapping_sub(1);
+    }
+    fn from_reader(&mut self, mut reader: Box<dyn Read>) -> Result<(), std::io::Error> {
+        let mut buffer = [0; 1];
+        Ok(reader.read_exact(&mut buffer)?)
+    }
+    fn to_writer(&self, mut writer: Box<dyn Write>) -> Result<(), std::io::Error> {
+        Ok(writer.write_all(&[*self])?)
     }
 }
 /// Error definitions for VirtualMaachine
