@@ -124,7 +124,9 @@ impl CellKind for u8 {
     }
     fn from_reader(&mut self, mut reader: Box<dyn Read>) -> Result<(), std::io::Error> {
         let mut buffer = [0; 1];
-        Ok(reader.read_exact(&mut buffer)?)
+        reader.read_exact(&mut buffer)?;
+        *self = buffer[0];
+        Ok(())
     }
     fn to_writer(&self, mut writer: Box<dyn Write>) -> Result<(), std::io::Error> {
         Ok(writer.write_all(&[*self])?)
