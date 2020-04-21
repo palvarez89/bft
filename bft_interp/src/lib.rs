@@ -73,7 +73,7 @@ where
         }
     }
     /// Read byte on memory cell pointed by head
-    pub fn read_into_head(&mut self, reader: Box<dyn Read>) -> Result<(), VMError> {
+    pub fn read_into_head<T: Read>(&mut self, reader: &mut T) -> Result<(), VMError> {
         let result = match self.memory.get_mut(self.head) {
             Some(cell) => cell.from_reader(reader),
             None => Ok(()),
@@ -87,7 +87,7 @@ where
         }
     }
     /// Write cell pointed by head into output
-    pub fn write_from_head(&self, writer: Box<dyn Write>) -> Result<(), VMError> {
+    pub fn write_from_head<T: Write>(&self, writer: &mut T) -> Result<(), VMError> {
         let result = match self.memory.get(self.head) {
             Some(cell) => cell.to_writer(writer),
             None => Ok(()),
@@ -110,9 +110,9 @@ pub trait CellKind: fmt::Debug {
     /// Decrement by one the value of the cell
     fn wrapping_decrement(&mut self);
     /// Load cell from reader
-    fn from_reader<T: Read>(&mut self, reader: T) -> Result<(), std::io::Error>;
+    fn from_reader<T: Read>(&mut self, reader: &mut T) -> Result<(), std::io::Error>;
     /// Write cell contents
-    fn to_writer<T: Write>(&self, writer: T) -> Result<(), std::io::Error>;
+    fn to_writer<T: Write>(&self, writer: &mut T) -> Result<(), std::io::Error>;
 }
 
 impl CellKind for u8 {
@@ -122,13 +122,13 @@ impl CellKind for u8 {
     fn wrapping_decrement(&mut self) {
         *self = self.wrapping_sub(1);
     }
-    fn from_reader<T: Read>(&mut self, mut reader: T) -> Result<(), std::io::Error> {
+    fn from_reader<T: Read>(&mut self, reader: &mut T) -> Result<(), std::io::Error> {
         let mut buffer = [0; 1];
         reader.read_exact(&mut buffer)?;
         *self = buffer[0];
         Ok(())
     }
-    fn to_writer<T: Write>(&self, mut writer: T) -> Result<(), std::io::Error> {
+    fn to_writer<T: Write>(&self, writer: &mut T) -> Result<(), std::io::Error> {
         Ok(writer.write_all(&[*self])?)
     }
 }
