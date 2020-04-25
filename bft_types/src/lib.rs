@@ -136,6 +136,14 @@ impl Program {
         &self.instructions
     }
 
+    /// Getter for the maching bracket given an instuction index
+    pub fn get_matching_bracket(&self, instruction_index: usize) -> std::option::Option<usize> {
+        match self.loop_gotos.get(&instruction_index) {
+            Some(n) => Some(n.to_owned()),
+            None => None,
+        }
+    }
+
     /// Check if the syntax of the program is correct
     pub fn check_syntax(&mut self) -> Result<(), Box<dyn Error>> {
         let mut bracket_index = Vec::<usize>::new();
