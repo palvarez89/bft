@@ -100,6 +100,15 @@ where
             Ok(_) => Ok(self.program_counter + 1),
         }
     }
+    /// Move to matching loop instruction
+    pub fn move_to_matching_opening_loop(&mut self) -> Result<usize, VMError> {
+        match self.program.get_matching_bracket(self.program_counter) {
+            Some(next_instruction) => Ok(next_instruction),
+            None => Err(VMError::BrokenLoop(
+                self.program.instructions()[self.program_counter],
+            )),
+        }
+    }
 }
 
 /// Define functions that our VirtualMachine cells
@@ -138,6 +147,8 @@ pub enum VMError {
     HeadOutOfMemory(Instruction),
     /// IO error when reading or writing bytes
     IOError(std::io::Error, Instruction),
+    /// Loop instruction missing matching bracket
+    BrokenLoop(Instruction),
 }
 
 #[cfg(test)]
