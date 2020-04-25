@@ -45,18 +45,18 @@ where
         }
     }
     /// Move head to the left
-    pub fn move_head_left(&mut self) -> Result<(), VMError> {
+    pub fn move_head_left(&mut self) -> Result<usize, VMError> {
         if self.head == 0 {
             Err(VMError::HeadOutOfMemory(
                 self.program.instructions()[self.program_counter],
             ))
         } else {
             self.head -= 1;
-            Ok(())
+            Ok(self.program_counter + 1)
         }
     }
     /// Move head to the right
-    pub fn move_head_right(&mut self) -> Result<(), VMError> {
+    pub fn move_head_right(&mut self) -> Result<usize, VMError> {
         // Check if we can increase the head
         if self.elastic || self.head != (self.memory.len() - 1) {
             // If head is at the end of the memory, considering
@@ -65,7 +65,7 @@ where
                 self.memory.push(Number::zero())
             }
             self.head += 1;
-            Ok(())
+            Ok(self.program_counter + 1)
         } else {
             Err(VMError::HeadOutOfMemory(
                 self.program.instructions()[self.program_counter],
@@ -73,7 +73,7 @@ where
         }
     }
     /// Read byte on memory cell pointed by head
-    pub fn read_into_head<T: Read>(&mut self, reader: &mut T) -> Result<(), VMError> {
+    pub fn read_into_head<T: Read>(&mut self, reader: &mut T) -> Result<usize, VMError> {
         let result = match self.memory.get_mut(self.head) {
             Some(cell) => cell.from_reader(reader),
             None => Ok(()),
@@ -83,11 +83,11 @@ where
                 e,
                 self.program.instructions()[self.program_counter],
             )),
-            Ok(_) => Ok(()),
+            Ok(_) => Ok(self.program_counter + 1),
         }
     }
     /// Write cell pointed by head into output
-    pub fn write_from_head<T: Write>(&self, writer: &mut T) -> Result<(), VMError> {
+    pub fn write_from_head<T: Write>(&self, writer: &mut T) -> Result<usize, VMError> {
         let result = match self.memory.get(self.head) {
             Some(cell) => cell.to_writer(writer),
             None => Ok(()),
@@ -97,7 +97,7 @@ where
                 e,
                 self.program.instructions()[self.program_counter],
             )),
-            Ok(_) => Ok(()),
+            Ok(_) => Ok(self.program_counter + 1),
         }
     }
 }
