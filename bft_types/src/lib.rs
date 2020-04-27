@@ -57,9 +57,12 @@ pub struct Instruction {
     column: usize,
 }
 
-#[derive(Debug)]
-enum ProgramError {
+/// Program error definitions
+#[derive(Debug, PartialEq)]
+pub enum ProgramError {
+    /// Syntax error when a loop is left open
     UnclosedLoop(Instruction),
+    /// Syntax error when a closing bracked dosen't have a matching opening one
     UnopenedLoop(Instruction),
 }
 
@@ -145,7 +148,7 @@ impl Program {
     }
 
     /// Check if the syntax of the program is correct
-    pub fn check_syntax(&mut self) -> Result<(), Box<dyn Error>> {
+    pub fn check_syntax(&mut self) -> Result<(), ProgramError> {
         let mut bracket_index = Vec::<usize>::new();
         for (index, current_inst) in self.instructions.iter().enumerate() {
             if let RawInstruction::BeginLoop = current_inst.instruction {
@@ -157,7 +160,7 @@ impl Program {
                         self.loop_gotos.insert(beginloop_index, index);
                         self.loop_gotos.insert(index, beginloop_index);
                     }
-                    None => return Err(Box::new(ProgramError::UnopenedLoop(*current_inst))),
+                    None => return Err(ProgramError::UnopenedLoop(*current_inst)),
                 }
             }
         }
@@ -165,7 +168,7 @@ impl Program {
         match bracket_index.pop() {
             Some(index) => {
                 let inst = self.instructions().get(index).unwrap();
-                Err(Box::new(ProgramError::UnclosedLoop(*inst)))
+                Err(ProgramError::UnclosedLoop(*inst))
             }
             None => Ok(()),
         }
