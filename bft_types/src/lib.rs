@@ -251,4 +251,55 @@ mod tests {
             }
         );
     }
+    #[test]
+    fn test_matching_bracket() {
+        use std::path::PathBuf;
+        // program: [>[]]
+        // index:   01234
+        let a_program_string = "[   >\n[foo]]";
+        let instructions = Program::extract_instrunctions(a_program_string.to_owned());
+        let mut program = Program::new(PathBuf::new(), instructions);
+        assert!(program.check_syntax().is_ok());
+
+        assert_eq!(program.get_matching_bracket(0), Some(4));
+        assert_eq!(program.get_matching_bracket(4), Some(0));
+        assert_eq!(program.get_matching_bracket(2), Some(3));
+        assert_eq!(program.get_matching_bracket(3), Some(2));
+        assert!(program.get_matching_bracket(1).is_none());
+    }
+
+    #[test]
+    fn test_check_syntax_fail_unclosed() {
+        let a_program_string = "[   >\n[foo]";
+        let instructions = Program::extract_instrunctions(a_program_string.to_owned());
+        let mut program = Program::new(PathBuf::new(), instructions);
+        let check_result = program.check_syntax();
+
+        assert!(check_result.is_err());
+        assert_eq!(
+            check_result,
+            Err(ProgramError::UnclosedLoop(Instruction {
+                row: 1,
+                column: 1,
+                instruction: RawInstruction::BeginLoop
+            }))
+        );
+    }
+    #[test]
+    fn test_check_syntax_fail_unopened() {
+        let a_program_string = "   >\n[foo]]";
+        let instructions = Program::extract_instrunctions(a_program_string.to_owned());
+        let mut program = Program::new(PathBuf::new(), instructions);
+        let check_result = program.check_syntax();
+
+        assert!(check_result.is_err());
+        assert_eq!(
+            check_result,
+            Err(ProgramError::UnopenedLoop(Instruction {
+                row: 2,
+                column: 6,
+                instruction: RawInstruction::EndLoop
+            }))
+        );
+    }
 }
