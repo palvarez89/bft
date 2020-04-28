@@ -58,6 +58,8 @@ where
             }?;
             self.program_counter = next_instruction;
         }
+        // TODO: implement in a nicer way
+        output.write(b"\n");
         Ok(())
     }
     /// Move head to the left
