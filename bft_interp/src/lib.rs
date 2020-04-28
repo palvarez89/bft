@@ -156,7 +156,7 @@ where
     pub fn check_opening_loop(&mut self) -> Result<usize, VMError> {
         if Number::is_zero(&self.memory[self.head]) {
             match self.program.get_matching_bracket(self.program_counter) {
-                Some(next_instruction) => Ok(next_instruction),
+                Some(next_instruction) => Ok(next_instruction + 1),
                 None => Err(VMError::BrokenLoop(
                     self.program.instructions()[self.program_counter],
                 )),
