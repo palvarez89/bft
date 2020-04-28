@@ -109,6 +109,19 @@ where
             )),
         }
     }
+    /// Check opening loop condition
+    pub fn check_opening_loop(&mut self) -> Result<usize, VMError> {
+        if Number::is_zero(&self.memory[self.head]) {
+            match self.program.get_matching_bracket(self.program_counter) {
+                Some(next_instruction) => Ok(next_instruction),
+                None => Err(VMError::BrokenLoop(
+                    self.program.instructions()[self.program_counter],
+                )),
+            }
+        } else {
+            Ok(self.program_counter + 1)
+        }
+    }
 }
 
 /// Define functions that our VirtualMachine cells
