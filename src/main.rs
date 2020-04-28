@@ -1,3 +1,4 @@
+use std::io;
 use std::path::Path;
 use structopt::StructOpt;
 mod cli;
@@ -22,6 +23,8 @@ fn run_bft(args: &cli::Opt) -> Result<(), Box<dyn std::error::Error>> {
     let mut the_program = bft_types::Program::from_file(Path::new(&args.input))?;
     the_program.check_syntax()?;
 
-    let memory = bft_interp::VirtualMachine::<u8>::new(&the_program, args.cells, args.extensible);
+    let mut vm = bft_interp::VirtualMachine::<u8>::new(&the_program, args.cells, args.extensible);
+
+    vm.interpret(&mut io::stdin(), &mut io::stdout());
     Ok(())
 }
