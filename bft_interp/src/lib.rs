@@ -72,6 +72,33 @@ where
             ))
         }
     }
+    /// Increment head
+    pub fn increment_head(&mut self) -> Result<usize, VMError> {
+        let cell = self.memory.get_mut(self.head);
+        match cell {
+            Some(c) => {
+                c.wrapping_increment();
+                Ok(self.program_counter + 1)
+            }
+            None => Err(VMError::BrokenHead(
+                self.program.instructions()[self.program_counter],
+            )),
+        }
+    }
+    /// Decrement head
+    pub fn decrement_head(&mut self) -> Result<usize, VMError> {
+        let cell = self.memory.get_mut(self.head);
+        match cell {
+            Some(c) => {
+                c.wrapping_decrement();
+                Ok(self.program_counter + 1)
+            }
+            None => Err(VMError::BrokenHead(
+                self.program.instructions()[self.program_counter],
+            )),
+        }
+    }
+
     /// Read byte on memory cell pointed by head
     pub fn read_into_head<T: Read>(&mut self, reader: &mut T) -> Result<usize, VMError> {
         let result = match self.memory.get_mut(self.head) {
@@ -162,6 +189,8 @@ pub enum VMError {
     IOError(std::io::Error, Instruction),
     /// Loop instruction missing matching bracket
     BrokenLoop(Instruction),
+    /// Errof when head was out of memory
+    BrokenHead(Instruction),
 }
 
 #[cfg(test)]
