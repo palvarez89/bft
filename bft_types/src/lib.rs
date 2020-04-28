@@ -50,7 +50,7 @@ impl RawInstruction {
 /// An instruction of a bft program with metadata
 pub struct Instruction {
     /// The raw instructin itself
-    instruction: RawInstruction,
+    pub instruction: RawInstruction,
     /// Row where the instruction is located
     row: usize,
     /// Column where the instruction is located

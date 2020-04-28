@@ -2,8 +2,7 @@
 
 #![deny(missing_docs)]
 
-use bft_types::Instruction;
-use bft_types::Program;
+use bft_types::{Instruction, Program, RawInstruction};
 use std::fmt;
 use std::io::{Read, Write};
 
@@ -37,12 +36,29 @@ where
             program_counter: 0,
         }
     }
-    /// Load program (not implemented yet)
-    pub fn load_program(&self, program: &Program) {
-        let instructions = program.instructions();
-        for inst in instructions {
-            println!("{:?}", inst);
+    /// Main execution loop
+    pub fn interpret<R, W>(&mut self, input: &mut R, output: &mut W) -> Result<(), VMError>
+    where
+        R: Read,
+        W: Write,
+    {
+        let program_lenght = self.program.instructions().len();
+
+        while self.program_counter < program_lenght {
+            let raw_inst = self.program.instructions()[self.program_counter].instruction;
+            let next_instruction = match raw_inst {
+                RawInstruction::BeginLoop => self.check_opening_loop(),
+                RawInstruction::EndLoop => self.move_to_matching_opening_loop(),
+                RawInstruction::MoveLeft => self.move_head_left(),
+                RawInstruction::MoveRight => self.move_head_right(),
+                RawInstruction::Increment => self.increment_head(),
+                RawInstruction::Decrement => self.decrement_head(),
+                RawInstruction::Input => self.read_into_head(input),
+                RawInstruction::Output => self.write_from_head(output),
+            }?;
+            self.program_counter = next_instruction;
         }
+        Ok(())
     }
     /// Move head to the left
     pub fn move_head_left(&mut self) -> Result<usize, VMError> {

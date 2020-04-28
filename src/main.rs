@@ -23,6 +23,5 @@ fn run_bft(args: &cli::Opt) -> Result<(), Box<dyn std::error::Error>> {
     the_program.check_syntax()?;
 
     let memory = bft_interp::VirtualMachine::<u8>::new(&the_program, args.cells, args.extensible);
-    memory.load_program(&the_program);
     Ok(())
 }
